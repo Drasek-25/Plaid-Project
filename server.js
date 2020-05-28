@@ -1,18 +1,18 @@
 const express = require("express");
-const cors = require("cors");
+const cors = require('cors');
 const mongoose = require("mongoose");
 const app = express();
 app.use(cors());
-const passport = require("passport");
-const path = require("path");
+const passport = require('passport');
+const path = require('path');
 
-const users = require("./routes/api/users");
-const plaid = require("./routes/api/plaid");
+const users = require('./routes/api/users');
+const plaid = require('./routes/api/plaid');
 
 app.use(
-   express.urlencoded({
-      extended: false,
-   })
+  express.urlencoded({
+    extended: false
+  })
 );
 app.use(express.json());
 
@@ -20,21 +20,25 @@ app.use(express.json());
 const db = require("./config/keys").mongoURI;
 // Connect to MongoDB
 mongoose
-   .connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
-   .then(() => console.log("MongoDB successfully connected"))
-   .catch((err) => console.log(err));
+  .connect(
+    db,
+    { useNewUrlParser: true, useUnifiedTopology: true }
+  )
+  .then(() => console.log("MongoDB successfully connected"))
+  .catch(err => console.log(err));
 
 app.use(passport.initialize());
-require("./config/passport")(passport);
+require('./config/passport')(passport);
 
 app.use("/api/users", users);
 app.use("/api/plaid", plaid);
 
-if (process.env.NODE_ENV === "production") {
-   app.use(express.static("client/build"));
-   app.get("*", (req, res) => {
-      res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
-   });
+if (process.env.NODE_ENV === 'production')
+{
+  app.use(express.static('client/build'));
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'))
+  });
 }
 const port = process.env.PORT || 5000; // process.env.port is Heroku's port if you choose to deploy the app there
 
