@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
-import qs from "qs";
 import { Link } from "react-router-dom";
+import { registerUser } from "../actions/apiActions";
+import { useDispatch, connect } from "react-redux";
 
-const Register = () => {
+const Register = (props) => {
    const initialState = {
       name: "",
       email: "",
@@ -11,48 +11,23 @@ const Register = () => {
       password2: "",
    };
    const [form, setForm] = useState(initialState);
-   const [loading, setLoading] = useState(false);
-   const [error, setError] = useState(false);
-   const [reg, setReg] = useState(false);
+
+   const dispatch = useDispatch();
 
    const handleInput = (e) => {
       setForm({ ...form, [e.target.name]: e.target.value });
    };
    const handleRegister = () => {
-      setLoading(true);
+      dispatch(registerUser(form));
    };
 
-   useEffect(() => {
-      const attemptLogin = async () => {
-         const result = await axios({
-            method: "post",
-            url: "http://localhost:5000/api/users/register",
-            data: qs.stringify(form),
-            headers: {
-               "content-type":
-                  "application/x-www-form-urlencoded;charset=utf-8",
-            },
-         })
-            .then((result) => {
-               setLoading(false);
-               setError(false);
-               setReg(result);
-            })
-            .catch((error) => {
-               setLoading(false);
-               setError(error);
-            });
-      };
-      loading && attemptLogin();
-   }, [loading]);
-
-   if (loading)
+   if (props.redux.register.loading)
       return (
          <div className="formContainer">
             <h1>LOADING...</h1>
          </div>
       );
-   else if (reg)
+   else if (props.redux.register.user.name)
       return (
          <div className="formContainer">
             <h1>Registration Successfull!</h1>
@@ -96,15 +71,9 @@ const Register = () => {
                ></input>
             </form>
             <button onClick={handleRegister}>Register</button>
-            {error && (
+            {props.redux.register.error.name && (
                <div className="errorField">
-                  {Object.keys(error.response.data).map((errorKey, i) => {
-                     console.log(errorKey);
-                     console.log(error.response.data[`${errorKey}`]);
-                     return (
-                        <h3 key={i}>{error.response.data[`${errorKey}`]}</h3>
-                     );
-                  })}
+                  <h3>Registration Failed</h3>
                </div>
             )}
          </div>
@@ -112,4 +81,10 @@ const Register = () => {
    }
 };
 
-export default Register;
+const mapStatetoProps = (state) => {
+   return {
+      redux: state,
+   };
+};
+
+export default connect(mapStatetoProps)(Register);
